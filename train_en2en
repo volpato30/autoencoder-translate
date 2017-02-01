@@ -1,0 +1,1 @@
+python translate_en2en.py --data_dir /home/rui/Data/Translation/training-giga-fren --train_dir /home/rui/Work/translate/en_model_weights

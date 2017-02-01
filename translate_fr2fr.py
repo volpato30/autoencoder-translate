@@ -154,8 +154,8 @@ def train():
         # Read data into buckets and compute their sizes.
         print ("Reading development and training data (limit: %d)."
                      % FLAGS.max_train_data_size)
-        dev_set = read_data(en_dev, fr_dev)
-        train_set = read_data(en_train, fr_train, FLAGS.max_train_data_size)
+        dev_set = read_data(fr_dev, en_dev)
+        train_set = read_data(fr_train, en_train, FLAGS.max_train_data_size)
         train_bucket_sizes = [len(train_set[b]) for b in xrange(len(_buckets))]
         train_total_size = float(sum(train_bucket_sizes))
 
@@ -198,7 +198,7 @@ def train():
                     sess.run(model.learning_rate_decay_op)
                 previous_losses.append(loss)
                 # Save checkpoint and zero timer and loss.
-                checkpoint_path = os.path.join(FLAGS.train_dir, "translate_en2en.ckpt")
+                checkpoint_path = os.path.join(FLAGS.train_dir, "translate_fr2fr.ckpt")
                 model.saver.save(sess, checkpoint_path, global_step=model.global_step)
                 step_time, loss = 0.0, 0.0
                 # Run evals on development set and print their perplexity.
@@ -227,7 +227,7 @@ def decode():
                                         "vocab%d.en" % FLAGS.en_vocab_size)
         fr_vocab_path = os.path.join(FLAGS.data_dir,
                                         "vocab%d.fr" % FLAGS.fr_vocab_size)
-        en_vocab, rev_en_vocab = data_utils.initialize_vocabulary(en_vocab_path)
+        fr_vocab, rev_fr_vocab = data_utils.initialize_vocabulary(fr_vocab_path)
 
         # Decode from standard input.
         sys.stdout.write("> ")
@@ -235,7 +235,7 @@ def decode():
         sentence = sys.stdin.readline()
         while sentence:
             # Get token-ids for the input sentence.
-            token_ids = data_utils.sentence_to_token_ids(tf.compat.as_bytes(sentence), en_vocab)
+            token_ids = data_utils.sentence_to_token_ids(tf.compat.as_bytes(sentence), fr_vocab)
             # Which bucket does it belong to?
             bucket_id = len(_buckets) - 1
             for i, bucket in enumerate(_buckets):
@@ -257,7 +257,7 @@ def decode():
             if data_utils.EOS_ID in outputs:
                 outputs = outputs[:outputs.index(data_utils.EOS_ID)]
             # Print out French sentence corresponding to outputs.
-            print(" ".join([tf.compat.as_str(rev_en_vocab[output]) for output in outputs]))
+            print(" ".join([tf.compat.as_str(rev_fr_vocab[output]) for output in outputs]))
             print("> ", end="")
             sys.stdout.flush()
             sentence = sys.stdin.readline()
