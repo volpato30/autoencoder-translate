@@ -1,0 +1,2 @@
+sqsub -q gpu -o ./log/en2en.log -r 7d --mpp 100G python -u translate_en2en.py --data_dir /work/rqiao/WMT15/data --train_dir ./en_model_weights
+sqsub -q gpu -o ./log/en2en.log -r 7d --mpp 100G python -u translate_fr2fr.py --data_dir /work/rqiao/WMT15/data --train_dir ./fr_model_weights
