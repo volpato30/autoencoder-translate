@@ -4,3 +4,4 @@ log/**
 *.ipynb
 .ipynb_checkpoints/**
 *.pkl
+*.mat
