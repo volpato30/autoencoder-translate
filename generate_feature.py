@@ -1,12 +1,12 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 
 import pickle
 with open('test_set.pkl', 'rb') as f:
     test_set = pickle.load(f)
 
-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import math
 import os
