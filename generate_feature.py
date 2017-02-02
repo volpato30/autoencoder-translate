@@ -48,7 +48,7 @@ tf.app.flags.DEFINE_boolean("self_test", False,
 tf.app.flags.DEFINE_boolean("use_fp16", False,
                                                         "Train using fp16 instead of fp32.")
 
-
+tf.app.flags.DEFINE_integer("language_id", 0, "0 for english, 1 for french") 
 
 
 FLAGS = tf.app.flags.FLAGS
