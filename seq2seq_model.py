@@ -153,7 +153,7 @@ class Seq2SeqModel(object):
 
         # Training outputs and losses.
         if forward_only:
-            self.outputs, self.losses = tf.nn.seq2seq.model_with_buckets(
+            self.outputs, self.losses, self.encoded_feature = tf.nn.seq2seq.model_with_buckets(
                     self.encoder_inputs, self.decoder_inputs, targets,
                     self.target_weights, buckets, lambda x, y: seq2seq_f(x, y, True),
                     softmax_loss_function=softmax_loss_function)
@@ -165,7 +165,7 @@ class Seq2SeqModel(object):
                             for output in self.outputs[b]
                     ]
         else:
-            self.outputs, self.losses = tf.nn.seq2seq.model_with_buckets(
+            self.outputs, self.losses, self.encoded_feature = tf.nn.seq2seq.model_with_buckets(
                     self.encoder_inputs, self.decoder_inputs, targets,
                     self.target_weights, buckets,
                     lambda x, y: seq2seq_f(x, y, False),
@@ -246,6 +246,43 @@ class Seq2SeqModel(object):
             return outputs[1], outputs[2], None  # Gradient norm, loss, no outputs.
         else:
             return None, outputs[0], outputs[1:]    # No gradient norm, loss, outputs.
+
+    def encode_batch(self, session, batch_inputs, bucket_id):
+        input_feed = {}
+        encoder_size = self.buckets[bucket_id][0]
+        for l in xrange(encoder_size):
+            input_feed[self.encoder_inputs[l].name] = batch_inputs[l]
+        output = self.encoded_feature[bucket_id]
+        return session.run(output, input_feed)
+
+    def _process_encoder_input(self, encoder_inputs, encoder_size):
+        batch_size = len(encoder_inputs)
+        batch_encoder_inputs = []
+        for length_idx in xrange(encoder_size):
+            batch_encoder_inputs.append(
+                    np.array([encoder_inputs[batch_idx][length_idx]
+                                        for batch_idx in xrange(batch_size)], dtype=np.int32))
+        return batch_encoder_inputs
+
+    def encode_testset(self, session, test_set, batch_size=64, language_id=0):
+        result = []
+        for bucket_id in xrange(len(self.buckets)):
+            bucket_result = []
+
+            encoder_inputs = []
+            i = 0 # iteration index
+            encoder_size = self.buckets[bucket_id][0]
+            tmp_data = [i[language_id] for i in test_set[bucket_id]]
+            for inputs in tmp_data:
+                encoder_pad = [data_utils.PAD_ID] * (encoder_size - len(inputs))
+                encoder_inputs.append(list(reversed(inputs + encoder_pad)))
+            for i in xrange((len(encoder_inputs)-1)//batch_size+1):
+                tmp_data = encoder_inputs[i*batch_size:(i+1)*batch_size]
+                batch_inputs = self._process_encoder_input(tmp_data, encoder_size)
+                bucket_result.append(self.encode_batch(session, batch_inputs, bucket_id))
+            result.append(np.concatenate(bucket_result,0))
+        return np.concatenate(result, 0)
+
 
     def get_batch(self, data, bucket_id):
         """Get a random batch of data from the specified bucket, prepare for step.
