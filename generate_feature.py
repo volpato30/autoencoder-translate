@@ -72,8 +72,8 @@ def create_model(session, forward_only):
     return model
 
 
-FLAGS.data_dir = "/home/rui/Data/Translation/training-giga-fren"
-FLAGS.train_dir = "./en_model_weights"
+# FLAGS.data_dir = "/home/rui/Data/Translation/training-giga-fren"
+# FLAGS.train_dir = "./en_model_weights"
 sess = tf.InteractiveSession()
 
 model = create_model(sess, True)
