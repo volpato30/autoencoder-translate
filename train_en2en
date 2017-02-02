@@ -1,1 +1,7 @@
 python translate_en2en.py --data_dir /home/rui/Data/Translation/training-giga-fren --train_dir /home/rui/Work/translate/en_model_weights
+python translate_en2en.py --decode --data_dir /home/rui/Data/Translation/training-giga-fren --train_dir /home/rui/Work/translate/en_model_weights
+sqsub -q gpu -o ./log/decode.log -r 7d --mpp 100G python -u translate_en2en.py --decode --data_dir /work/rqiao/WMT15/data --train_dir ./en_model_weights
+sqsub -q gpu -o ./log/decode_fr.log -r 7d --mpp 100G python -u translate_fr2fr.py --decode --data_dir /work/rqiao/WMT15/data --train_dir ./fr_model_weights
+python -u translate_en2en.py --decode --data_dir /home/rui/Data/Translation/training-giga-fren --train_dir ./en_model_weights
+sqsub -q gpu -o ./log/genrate_en_feature.log -r 1d --mpp 100G python -u generate_feature.py --data_dir /work/rqiao/WMT15/data --train_dir ./en_model_weights
+sqsub -q gpu -o ./log/genrate_fr_feature.log -r 1d --mpp 100G python -u generate_feature.py --data_dir /work/rqiao/WMT15/data --train_dir ./fr_model_weights --language_id 1
