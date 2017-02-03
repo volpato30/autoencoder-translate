@@ -69,7 +69,7 @@ tf.app.flags.DEFINE_boolean("self_test", False,
                                                         "Run a self-test if this is set to True.")
 tf.app.flags.DEFINE_boolean("use_fp16", False,
                                                         "Train using fp16 instead of fp32.")
-
+tf.app.flags.DEFINE_boolean("basic_rnn", True, "using basic rnn or attention model")
 FLAGS = tf.app.flags.FLAGS
 
 # We use a number of buckets and pad to the closest one for efficiency.
@@ -128,6 +128,7 @@ def create_model(session, forward_only):
             FLAGS.learning_rate,
             FLAGS.learning_rate_decay_factor,
             forward_only=forward_only,
+            basic_rnn=FLAGS.basic_rnn,
             dtype=dtype)
     ckpt = tf.train.get_checkpoint_state(FLAGS.train_dir)
     if ckpt and tf.train.checkpoint_exists(ckpt.model_checkpoint_path):

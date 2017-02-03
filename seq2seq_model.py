@@ -56,6 +56,7 @@ class Seq2SeqModel(object):
                              use_lstm=False,
                              num_samples=512,
                              forward_only=False,
+                             basic_rnn=False,
                              dtype=tf.float32):
         """Create the model.
 
@@ -123,16 +124,28 @@ class Seq2SeqModel(object):
 
         # The seq2seq function: we use embedding for the input and attention.
         def seq2seq_f(encoder_inputs, decoder_inputs, do_decode):
-            return tf.nn.seq2seq.embedding_attention_seq2seq(
-                    encoder_inputs,
-                    decoder_inputs,
-                    cell,
-                    num_encoder_symbols=source_vocab_size,
-                    num_decoder_symbols=target_vocab_size,
-                    embedding_size=size,
-                    output_projection=output_projection,
-                    feed_previous=do_decode,
-                    dtype=dtype)
+            if not basic_rnn:
+                return tf.nn.seq2seq.embedding_attention_seq2seq(
+                        encoder_inputs,
+                        decoder_inputs,
+                        cell,
+                        num_encoder_symbols=source_vocab_size,
+                        num_decoder_symbols=target_vocab_size,
+                        embedding_size=size,
+                        output_projection=output_projection,
+                        feed_previous=do_decode,
+                        dtype=dtype)
+            else:
+                return tf.nn.seq2seq.embedding_rnn_seq2seq(
+                        encoder_inputs,
+                        decoder_inputs,
+                        cell,
+                        num_encoder_symbols=source_vocab_size,
+                        num_decoder_symbols=target_vocab_size,
+                        embedding_size=size,
+                        output_projection=output_projection,
+                        feed_previous=do_decode,
+                        dtype=dtype)
 
         # Feeds for inputs.
         self.encoder_inputs = []
