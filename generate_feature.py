@@ -21,6 +21,7 @@ import tensorflow as tf
 
 from tensorflow.models.rnn.translate import data_utils
 import seq2seq_model
+from translate_en2en import create_model
 import scipy.io as sio
 
 
@@ -47,8 +48,9 @@ tf.app.flags.DEFINE_boolean("self_test", False,
                                                         "Run a self-test if this is set to True.")
 tf.app.flags.DEFINE_boolean("use_fp16", False,
                                                         "Train using fp16 instead of fp32.")
+tf.app.flags.DEFINE_boolean("basic_rnn", True, "using basic rnn or attention model")
 
-tf.app.flags.DEFINE_integer("language_id", 0, "0 for english, 1 for french") 
+tf.app.flags.DEFINE_integer("language_id", 0, "0 for english, 1 for french")
 
 
 FLAGS = tf.app.flags.FLAGS
@@ -58,29 +60,6 @@ FLAGS = tf.app.flags.FLAGS
 _buckets = [(5, 10), (10, 15), (20, 25), (40, 50)]
 
 
-def create_model(session, forward_only):
-    """Create translation model and initialize or load parameters in session."""
-    dtype = tf.float16 if FLAGS.use_fp16 else tf.float32
-    model = seq2seq_model.Seq2SeqModel(
-            FLAGS.en_vocab_size,
-            FLAGS.fr_vocab_size,
-            _buckets,
-            FLAGS.size,
-            FLAGS.num_layers,
-            FLAGS.max_gradient_norm,
-            FLAGS.batch_size,
-            FLAGS.learning_rate,
-            FLAGS.learning_rate_decay_factor,
-            forward_only=forward_only,
-            dtype=dtype)
-    ckpt = tf.train.get_checkpoint_state(FLAGS.train_dir)
-    if ckpt and tf.train.checkpoint_exists(ckpt.model_checkpoint_path):
-        print("Reading model parameters from %s" % ckpt.model_checkpoint_path)
-        model.saver.restore(session, ckpt.model_checkpoint_path)
-    else:
-        print("Created model with fresh parameters.")
-        session.run(tf.global_variables_initializer())
-    return model
 
 
 # FLAGS.data_dir = "/home/rui/Data/Translation/training-giga-fren"
